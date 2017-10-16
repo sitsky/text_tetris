@@ -4,35 +4,49 @@ using System.Collections;
 
 public class Text_Grid : MonoBehaviour {
 
+    static int ROWS = 20;
+    static int COLUMNS = 11;
+
+    float time_last_move = 0;
+
+
     Text grid_text;
-    public static char[,] grid = new char[20,10];
+    public static string[,] grid = new string[ROWS,COLUMNS];
     // Use this for initialization
     void Start () {
 
         grid_text = GetComponent<Text>();
         grid_text.text = "";
-        for (int i =0; i<20; i++)
+        for (int i =0; i< ROWS; i++)
         {
-            for (int j=0; j<10; j++)
+            for (int j=0; j< COLUMNS; j++)
             {
-                grid[i, j] = 'O';
+                grid[i, j] = "O";
             }
         }
+        grid_print();
 
-        string each_line = "";
-        for (int i = 0; i < 20; i++)
-        {
-            for (int j = 0; j < 10; j++)
-            {
-                each_line = each_line + grid[i, j].ToString();
-            }
-            grid_text.text = grid_text.text + each_line + "\n";
-            each_line = "";
-        }
+        grid[1, 5] = "X";
     }
-    
     // Update is called once per frame
     void Update() {
-
-    }  
+        
+        if (Time.time - time_last_move > 1)
+        {
+            for (int i = 0; i <ROWS; i++)
+            {
+                for (int j = 0; j<COLUMNS; j++)
+                {
+                    grid[i + 1, j] = grid[i, j];
+                }
+            }
+        }
+        grid_print();
+        time_last_move = Time.time;
+    } 
+    
+    public void grid_print()
+    {
+        grid_text.text = grid.ToString();
+    } 
 }
