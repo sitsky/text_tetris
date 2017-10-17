@@ -78,6 +78,7 @@ public class Text_Grid : MonoBehaviour {
             }
         }
         grid_print();
+
     }
 
     public void move_one_down(int Dj, int k = GROUND)
