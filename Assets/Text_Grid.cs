@@ -53,6 +53,38 @@ public class Text_Grid : MonoBehaviour {
         grid_print();
     }
 
+    public void new_drop()
+    {
+        int piece_choise = Random.Range(1, number_of_pieces);
+        switch (piece_choise)
+        {
+            case 1:
+                grid[0, 5] = "X"; grid[1, 5] = "X"; grid[2, 5] = "X"; grid[2, 6] = "X";
+                break; //L
+            case 2:
+                grid[0, 5] = "X"; grid[1, 5] = "X"; grid[2, 5] = "X"; grid[2, 4] = "X";
+                break; //J
+            case 3:
+                grid[0, 5] = "X"; grid[1, 5] = "X"; grid[2, 5] = "X"; grid[3, 5] = "X";
+                break; //I
+            case 4:
+                grid[0, 5] = "X"; grid[0, 6] = "X"; grid[1, 5] = "X"; grid[1, 6] = "X";
+                break; //O
+            case 5:
+                grid[0, 4] = "X"; grid[0, 5] = "X"; grid[1, 5] = "X"; grid[1, 6] = "X";
+                break; //S
+            case 6:
+                grid[0, 5] = "X"; grid[0, 6] = "X"; grid[1, 5] = "X"; grid[1, 4] = "X";
+                break; //Z
+            case 7:
+                grid[0, 4] = "X"; grid[0, 5] = "X"; grid[0, 6] = "X"; grid[1, 5] = "X";
+                break; //T
+            default:
+                Debug.Log("New Piece Choice fail!");
+                break;
+        }
+    }
+
     public void move_one_down(int k = GROUND)
     {
         bool need_new_piece = false;
@@ -103,38 +135,6 @@ public class Text_Grid : MonoBehaviour {
         move_one_down(i);
     }
 
-    public void new_drop()
-    {
-        int piece_choise = Random.Range(1, number_of_pieces);
-        switch (piece_choise)
-        {
-            case 1:
-                grid[0, 5] = "X"; grid[1, 5] = "X"; grid[2, 5] = "X"; grid[2, 6] = "X";
-                break; //L
-            case 2:
-                grid[0, 5] = "X"; grid[1, 5] = "X"; grid[2, 5] = "X"; grid[2, 4] = "X";
-                break; //J
-            case 3:
-                grid[0, 5] = "X"; grid[1, 5] = "X"; grid[2, 5] = "X"; grid[3, 5] = "X";
-                break; //I
-            case 4:
-                grid[0, 5] = "X"; grid[0, 6] = "X"; grid[1, 5] = "X"; grid[1, 6] = "X";
-                break; //O
-            case 5:
-                grid[0, 4] = "X"; grid[0, 5] = "X"; grid[1, 5] = "X"; grid[1, 6] = "X";
-                break; //S
-            case 6:
-                grid[0, 5] = "X"; grid[0, 6] = "X"; grid[1, 5] = "X"; grid[1, 4] = "X";
-                break; //Z
-            case 7:
-                grid[0, 4] = "X"; grid[0, 5] = "X"; grid[0, 6] = "X"; grid[1, 5] = "X";
-                break; //T
-            default:
-                Debug.Log("New Piece Choice fail!");
-                break;
-        }
-    }
-    
     public void grid_print()
     {
         string to_print = "|";
