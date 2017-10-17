@@ -6,8 +6,15 @@ public class Text_Grid : MonoBehaviour {
 
     static int ROWS = 20;
     static int COLUMNS = 11;
+    static float DROP_EVERY_SECONDS = 0.5f;
+    const int GROUND = 19;
+
+    enum Pieces : int {L, J, I, O, S, Z, T};
+    int number_of_pieces = 7;
+
     float time_last_move = 0;
     Text grid_text;
+
     public static string[,] grid = new string[ROWS,COLUMNS];
     
     // Use this for initialization
@@ -18,32 +25,34 @@ public class Text_Grid : MonoBehaviour {
         {
             for (int j = 0; j < COLUMNS; j++)
             {
-                if (i < ROWS - 1)
+                if (i < GROUND)
                 {
                     grid[i, j] = "O";
                 }
                 else
                 {
-                    grid[i, j] = "G";
+                    grid[i, j] = "G"; //Ground mark
                 }
             }
         }
         grid_print();
         new_drop();
         
+        //test line missing one X 
         for( int j = 0; j< COLUMNS; j++)
         {
             grid[17, j] = "X";
         }
-        grid[17, 5] = "O"; 
+        grid[17, 5] = "O";
+        //test line end 
     }
     // Update is called once per frame
     void Update() {
-        if (Time.time - time_last_move > 0.5f)
+        if (Time.time - time_last_move > DROP_EVERY_SECONDS)
         {
             move_one_down();
             time_last_move = Time.time;
-            for (int i = 0; i < ROWS-1; i++)
+            for (int i = 0; i < GROUND; i++)
             {
                 check_full_row(i);
             }
@@ -78,9 +87,9 @@ public class Text_Grid : MonoBehaviour {
         grid[0, 5] = "X";
     }
      
-    public void move_one_down(int k = 19)
+    public void move_one_down(int k = GROUND)
     {
-        for (int i = k - 2; i >= 0; i--)
+        for (int i = GROUND - 1; i >= 0; i--)
         {
             for (int j = 0; j < COLUMNS; j++)
             {
