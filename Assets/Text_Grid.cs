@@ -14,7 +14,7 @@ public class Text_Grid : MonoBehaviour {
 
     public static string[,] grid = new string[COLUMNS, ROWS];
 
-    static float DROP_EVERY_SECONDS = 0.5f;
+    static float DROP_EVERY_SECONDS = 0.25f;
     float time_last_move = 0;
 
     public enum Pieces:int {L= 1, J, I, O, S, Z, T};
@@ -80,7 +80,7 @@ public class Text_Grid : MonoBehaviour {
         if (!enabled)
             Game_Over();
     }
-
+    
     public void where_X_are()
     {
         int point = 0;
@@ -99,7 +99,7 @@ public class Text_Grid : MonoBehaviour {
         }
     }
 
-
+    //game controls
     public void rotate_Clockwise()
     {
         where_X_are();
@@ -163,7 +163,6 @@ public class Text_Grid : MonoBehaviour {
             grid[Rotated_Xcoords[point, 0], Rotated_Xcoords[point, 1]] = "X";
         }
     }
-
     public void rotate_AntiClockwise()
     {
         where_X_are();
@@ -256,7 +255,6 @@ public class Text_Grid : MonoBehaviour {
             grid[Xcoords[point, 0] - 1, Xcoords[point, 1]] = "X";
         }
     }
-
     public void move_right()
     {
         for (int row = GROUND - 1; row >= 0; row--)
@@ -286,6 +284,7 @@ public class Text_Grid : MonoBehaviour {
         }
     }
 
+    //Game rules
     public void move_all_one_down(int drop_above_rows)
     {
         where_X_are();
@@ -327,9 +326,58 @@ public class Text_Grid : MonoBehaviour {
                 grid[Xcoords[point, 0] , Xcoords[point, 1] + 1] = "X";
             }
         }
+    }               
+    public void check_full_row(int row)
+    {
+        //Debug.Log("check_full_row: " + i.ToString());
+        for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
+        {
+            if (!(grid[col, row].Equals("G")))
+                return;
+        }
+        line_destroy_and_drop(row);
     }
-            
+    public void line_destroy_and_drop(int row_to_destroy)
+    {
+        //Debug.Log("line_destroy_and_drop");
+        for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
+        {
+            grid[col, row_to_destroy] = " ";
+        }
 
+        for (int row = row_to_destroy - 1; row >= 0; row--)
+        {
+            for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
+            {
+                grid[col, row + 1] = grid[col, row];
+            }
+        }
+    }
+
+    //UI stuff
+    public void Game_Over()
+    {
+
+
+        grid_text.text = "GAME OVER!";
+
+        grid_text.fontSize = 16;
+        EditorApplication.isPaused = true;
+    }
+    public void grid_print()
+    {
+        string to_print = piece_choice[0].ToString() + "\n";
+
+        for (int row = 0; row < ROWS; row++)
+        {
+            for (int col = 0; col < COLUMNS; col++)
+            {
+                to_print = to_print + grid[col, row];
+            }
+            to_print = to_print + "\n";
+        }
+        grid_text.text = to_print;
+    }
     public void new_piece()
     {
         piece_choice[0] = (Pieces)Random.Range(1, number_of_pieces);
@@ -361,59 +409,5 @@ public class Text_Grid : MonoBehaviour {
                 break;
         }
         piece_choice[1] = piece_choice[0];
-    }
-
-    public void check_full_row(int row)
-    {
-        //Debug.Log("check_full_row: " + i.ToString());
-        for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
-        {
-            if (!(grid[col, row].Equals("G")))
-                return;
-        }
-        line_destroy_and_drop(row);
-    }
-
-    public void line_destroy_and_drop(int row_to_destroy)
-    {
-        //Debug.Log("line_destroy_and_drop");
-        for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
-        {
-            grid[col, row_to_destroy] = " ";
-        }
-
-        for (int row = row_to_destroy - 1; row >= 0; row--)
-        {
-            for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
-            {
-                grid[col, row + 1] = grid[col, row];
-            }
-        }
-    }
-
-    public void Game_Over()
-    {
-
-
-        grid_text.text = "GAME OVER!";
-
-        grid_text.fontSize = 16;
-        EditorApplication.isPaused = true;
-    }
-
-
-    public void grid_print()
-    {
-        string to_print = piece_choice[0].ToString() + "\n";
-
-        for (int row = 0; row < ROWS; row++)
-        {
-            for (int col = 0; col < COLUMNS; col++)
-            {
-                to_print = to_print + grid[col, row];
-            }
-            to_print = to_print + "\n";
-        }
-        grid_text.text = to_print;
     }
 }
