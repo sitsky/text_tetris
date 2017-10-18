@@ -20,7 +20,7 @@ public class Text_Grid : MonoBehaviour {
     public int number_of_pieces = 7;
 
     Pieces[] piece_choice = new Pieces[2];
-    bool need_new_piece;
+    
     //static string next_piece;
 
     int[,] Xcoords = new int[4, 2];
@@ -68,13 +68,15 @@ public class Text_Grid : MonoBehaviour {
             rotate_Clockwise();
         }
 
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            rotate_AntiClockwise();
+        }
+        
         if (Time.time - time_last_move > DROP_EVERY_SECONDS)
         {
             move_all_one_down(GROUND);
-            for (int row = 0; row < GROUND; row++)
-            {
-                check_full_row(row);
-            }
+
             time_last_move = Time.time;
         }
         grid_print();
@@ -89,6 +91,7 @@ public class Text_Grid : MonoBehaviour {
             {
                 if (grid[col, row].Equals("X"))
                 {
+                    Debug.Log(point.ToString());
                     Xcoords[point, 0] = col;
                     Xcoords[point, 1] = row;
                     point++;
@@ -97,7 +100,6 @@ public class Text_Grid : MonoBehaviour {
         }
     }
 
-    //public void where_X_Center() {}
 
     public void rotate_Clockwise()
     {
@@ -130,15 +132,7 @@ public class Text_Grid : MonoBehaviour {
             Rotated_Xcoords[point, 1] = (Trans_to_Zero_Xcoords[point, 0] * rotation[1, 0] + Trans_to_Zero_Xcoords[point, 1] * rotation[1, 1]) + central_coordinate_for_rows;
         }
         //Xs rotated and moved back to where they were
-        for (int point = 0; point < 4; point++)
-        {
-            Debug.Log("X: " + Xcoords[point, 0].ToString() + " " + Xcoords[point, 1].ToString());
-            Debug.Log(central_coordinate_for_cols.ToString() + "  " + central_coordinate_for_rows.ToString());
-            Debug.Log("RTX: " + Trans_to_Zero_Xcoords[point, 0].ToString() + " " + Trans_to_Zero_Xcoords[point, 1].ToString());
-            Debug.Log("TX: " + (Trans_to_Zero_Xcoords[point, 0] * rotation[0, 0] + Trans_to_Zero_Xcoords[point, 1] * rotation[0, 1]).ToString()
-                       + " " + (Trans_to_Zero_Xcoords[point, 0] * rotation[1, 0] + Trans_to_Zero_Xcoords[point, 1] * rotation[1, 1]).ToString());
-            Debug.Log("RX: " + Rotated_Xcoords[point, 0].ToString() + " " + Rotated_Xcoords[point, 1].ToString());
-        }
+
         //check on validity of rotation
         for (int point = 0; point < 4; point++)
         {
@@ -164,6 +158,73 @@ public class Text_Grid : MonoBehaviour {
         for (int point = 0; point < 4; point++)
         {
             grid[Xcoords[point, 0], Xcoords[point, 1]] = " ";
+        }
+        for (int point = 0; point < 4; point++)
+        {
+            grid[Rotated_Xcoords[point, 0], Rotated_Xcoords[point, 1]] = "X";
+        }
+    }
+
+    public void rotate_AntiClockwise()
+    {
+        where_X_are();
+        //find center of Xs
+        int central_coordinate_for_rows = 0;
+        int central_coordinate_for_cols = 0;
+        for (int point = 0; point < 4; point++)
+        {
+            central_coordinate_for_cols = central_coordinate_for_cols + Xcoords[point, 0];
+            central_coordinate_for_rows = central_coordinate_for_rows + Xcoords[point, 1];
+        }
+        central_coordinate_for_cols = (int)Mathf.Floor(central_coordinate_for_cols / 4f);
+        central_coordinate_for_rows = (int)Mathf.Floor(central_coordinate_for_rows / 4f);
+
+
+        //move Xs to Zero and Rotate them
+        int[,] rotation = { { 0, -1 }, { 1, 0 } };
+        int[,] Trans_to_Zero_Xcoords = new int[4, 2];
+        int[,] Rotated_Xcoords = new int[4, 2];
+
+        for (int point = 0; point < 4; point++)
+        {
+            Trans_to_Zero_Xcoords[point, 0] = (Xcoords[point, 0] - central_coordinate_for_cols);
+            Trans_to_Zero_Xcoords[point, 1] = (Xcoords[point, 1] - central_coordinate_for_rows);
+        }
+        for (int point = 0; point < 4; point++)
+        {
+            Rotated_Xcoords[point, 0] = (Trans_to_Zero_Xcoords[point, 0] * rotation[0, 0] + Trans_to_Zero_Xcoords[point, 1] * rotation[0, 1]) + central_coordinate_for_cols;
+            Rotated_Xcoords[point, 1] = (Trans_to_Zero_Xcoords[point, 0] * rotation[1, 0] + Trans_to_Zero_Xcoords[point, 1] * rotation[1, 1]) + central_coordinate_for_rows;
+        }
+        //Xs rotated and moved back to where they were
+
+        //check on validity of rotation
+        for (int point = 0; point < 4; point++)
+        {
+
+            if ((Rotated_Xcoords[point, 0] < LEFT_WALL + 1) || (Rotated_Xcoords[point, 0] > RIGHT_WALL - 1))
+            {
+                Debug.Log("Too Right too Left");
+                return;
+            }
+            if ((Rotated_Xcoords[point, 1] > 18) || (Rotated_Xcoords[point, 1] < 0))
+            {
+                Debug.Log("Too High too Low");
+                return;
+            }
+            if ((grid[Rotated_Xcoords[point, 0], Rotated_Xcoords[point, 1]].Equals("G")))
+            {
+                Debug.Log("Hit the ground turn to G");
+                //MISSING
+                return;
+            }
+        }
+        //all good remove old Xs add new ones.
+        for (int point = 0; point < 4; point++)
+        {
+            grid[Xcoords[point, 0], Xcoords[point, 1]] = " ";
+        }
+        for (int point = 0; point < 4; point++)
+        {
             grid[Rotated_Xcoords[point, 0], Rotated_Xcoords[point, 1]] = "X";
         }
     }
@@ -191,12 +252,9 @@ public class Text_Grid : MonoBehaviour {
         {
             grid[Xcoords[point, 0], Xcoords[point, 1]] = " ";
         }
-
         for (int point = 0; point < 4; point++)
         {
-            Debug.Log(grid[Xcoords[point, 0] - 1, Xcoords[point, 1]]);
             grid[Xcoords[point, 0] - 1, Xcoords[point, 1]] = "X";
-            Debug.Log(grid[Xcoords[point, 0] - 1, Xcoords[point, 1]]);
         }
     }
 
@@ -224,11 +282,10 @@ public class Text_Grid : MonoBehaviour {
             grid[Xcoords[point, 0], Xcoords[point, 1]] = " ";
         }
         for (int point = 0; point < 4; point++)
-        { 
+        {
             grid[Xcoords[point, 0] + 1, Xcoords[point, 1]] = "X";
         }
     }
-
 
     public void move_all_one_down(int drop_above_rows)
     {
@@ -243,11 +300,17 @@ public class Text_Grid : MonoBehaviour {
         }
         if (groundhit)
         {
+            groundhit = false;
             for (int point = 0; point < 4; point++)
             {
                 grid[Xcoords[point, 0], Xcoords[point, 1]] = "G";
             }
+            for (int row = 0; row < GROUND; row++)
+            {
+                check_full_row(row);
+            }
             new_piece();
+            where_X_are();
         }
         else
         {
@@ -257,7 +320,7 @@ public class Text_Grid : MonoBehaviour {
             }
             for (int point = 0; point < 4; point++)
             {
-                grid[Xcoords[point, 0], Xcoords[point, 1] + 1] = "X";
+                grid[Xcoords[point, 0] , Xcoords[point, 1] + 1] = "X";
             }
         }
     }
@@ -280,10 +343,10 @@ public class Text_Grid : MonoBehaviour {
             case Pieces.O:
                 grid[5, 0] = "X"; grid[6, 0] = "X"; grid[5, 1] = "X"; grid[6, 1] = "X";
                 break; //O
-            case Pieces.S:
+            case Pieces.Z:
                 grid[4, 0] = "X"; grid[5, 0] = "X"; grid[5, 1] = "X"; grid[6, 1] = "X";
                 break; //S
-            case Pieces.Z:
+            case Pieces.S:
                 grid[5, 0] = "X"; grid[6, 0] = "X"; grid[5, 1] = "X"; grid[4, 1] = "X";
                 break; //Z
             case Pieces.T:
@@ -315,18 +378,18 @@ public class Text_Grid : MonoBehaviour {
             grid[col, row_to_destroy] = " ";
         }
 
-        for (int row = row_to_destroy; row >= 0; row--)
+        for (int row = row_to_destroy - 1; row >= 0; row--)
         {
             for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
             {
-                grid[col, row] = grid[col, row + 1];
+                grid[col, row + 1] = grid[col, row];
             }
         }
     }
 
     public void grid_print()
     {
-        string to_print = "";
+        string to_print = piece_choice[0].ToString() + "\n";
         //to_print = next_piece + "\n";
         for (int row = 0; row < ROWS; row++)
         {
