@@ -87,7 +87,7 @@ public class Text_Grid : MonoBehaviour {
         {
             for (int row = GROUND - 1; row >= 0; row--)
             {
-                if (grid[row, col].Equals("X"))
+                if (grid[col, row].Equals("X"))
                 {
                     Xcoords[point, 0] = col;
                     Xcoords[point, 1] = row;
@@ -97,9 +97,12 @@ public class Text_Grid : MonoBehaviour {
         }
     }
 
+    //public void where_X_Center() {}
+
     public void rotate_Clockwise()
     {
         where_X_are();
+        //find center of Xs
         int central_coordinate_for_rows = 0;
         int central_coordinate_for_cols = 0;
         for (int point = 0; point <4; point++)
@@ -110,37 +113,57 @@ public class Text_Grid : MonoBehaviour {
         central_coordinate_for_cols = (int)Mathf.Floor(central_coordinate_for_cols / 4f);
         central_coordinate_for_rows = (int)Mathf.Floor(central_coordinate_for_rows / 4f);
 
-        for (int point = 0; point < 4; point++)
-        {
-            Xcoords[point, 0] = (Xcoords[point, 0] - central_coordinate_for_cols);
-            Xcoords[point, 1] = (Xcoords[point, 1] - central_coordinate_for_rows);
-        }
 
+        //move Xs to Zero and Rotate them
         int[,] rotation = { { 0, 1 }, { -1, 0 } };
+        int[,] Trans_to_Zero_Xcoords = new int[4, 2];
         int[,] Rotated_Xcoords = new int[4, 2];
+
         for (int point = 0; point < 4; point++)
         {
-            Rotated_Xcoords[point, 0] = (Xcoords[point, 0] * rotation[0, 0] + Xcoords[point, 1] * rotation[0, 1]) + central_coordinate_for_cols;
-            Rotated_Xcoords[point, 1] = (Xcoords[point, 0] * rotation[1, 0] + Xcoords[point, 1] * rotation[1, 1]) + central_coordinate_for_rows;
+            Trans_to_Zero_Xcoords[point, 0] = (Xcoords[point, 0] - central_coordinate_for_cols);
+            Trans_to_Zero_Xcoords[point, 1] = (Xcoords[point, 1] - central_coordinate_for_rows);
         }
         for (int point = 0; point < 4; point++)
         {
-            if ((grid[Rotated_Xcoords[point, 0], Rotated_Xcoords[point, 1] ].Equals("G")))
+            Rotated_Xcoords[point, 0] = (Trans_to_Zero_Xcoords[point, 0] * rotation[0, 0] + Trans_to_Zero_Xcoords[point, 1] * rotation[0, 1]) + central_coordinate_for_cols;
+            Rotated_Xcoords[point, 1] = (Trans_to_Zero_Xcoords[point, 0] * rotation[1, 0] + Trans_to_Zero_Xcoords[point, 1] * rotation[1, 1]) + central_coordinate_for_rows;
+        }
+        //Xs rotated and moved back to where they were
+        for (int point = 0; point < 4; point++)
+        {
+            Debug.Log("X: " + Xcoords[point, 0].ToString() + " " + Xcoords[point, 1].ToString());
+            Debug.Log(central_coordinate_for_cols.ToString() + "  " + central_coordinate_for_rows.ToString());
+            Debug.Log("RTX: " + Trans_to_Zero_Xcoords[point, 0].ToString() + " " + Trans_to_Zero_Xcoords[point, 1].ToString());
+            Debug.Log("TX: " + (Trans_to_Zero_Xcoords[point, 0] * rotation[0, 0] + Trans_to_Zero_Xcoords[point, 1] * rotation[0, 1]).ToString()
+                       + " " + (Trans_to_Zero_Xcoords[point, 0] * rotation[1, 0] + Trans_to_Zero_Xcoords[point, 1] * rotation[1, 1]).ToString());
+            Debug.Log("RX: " + Rotated_Xcoords[point, 0].ToString() + " " + Rotated_Xcoords[point, 1].ToString());
+        }
+        //check on validity of rotation
+        for (int point = 0; point < 4; point++)
+        {
+
+            if ((Rotated_Xcoords[point, 0] < LEFT_WALL + 1) || (Rotated_Xcoords[point, 0] > RIGHT_WALL - 1))
             {
-                Debug.Log("No room to rotate turn to G");
+                Debug.Log("Too Right too Left");
                 return;
             }
-            if ((Rotated_Xcoords[point, 0] < LEFT_WALL + 1) || (Rotated_Xcoords[point, 1] < 0))
+            if((Rotated_Xcoords[point, 1] > 18) || (Rotated_Xcoords[point, 1] < 0))
             {
+                Debug.Log("Too High too Low");
                 return;
             }
-            if(Rotated_Xcoords[point, 0] > RIGHT_WALL)
+            if ((grid[Rotated_Xcoords[point, 0], Rotated_Xcoords[point, 1]].Equals("G")))
             {
+                Debug.Log("Hit the ground turn to G");
+                //MISSING
                 return;
             }
         }
+        //all good remove old Xs add new ones.
         for (int point = 0; point < 4; point++)
         {
+            grid[Xcoords[point, 0], Xcoords[point, 1]] = " ";
             grid[Rotated_Xcoords[point, 0], Rotated_Xcoords[point, 1]] = "X";
         }
     }
@@ -149,7 +172,7 @@ public class Text_Grid : MonoBehaviour {
     {
         for (int row = GROUND - 1; row >= 0; row--)
         {
-            if (grid[row, LEFT_WALL + 1].Equals("X"))
+            if (grid[LEFT_WALL + 1, row].Equals("X"))
             {
                 Debug.Log("X On edge");
                 return;
@@ -158,7 +181,7 @@ public class Text_Grid : MonoBehaviour {
         where_X_are();
         for (int point = 0; point < 4; point++)
         {
-            if ((grid[Xcoords[point, 0], Xcoords[point, 1] - 1].Equals("G")))
+            if ((grid[Xcoords[point, 0] - 1, Xcoords[point, 1]].Equals("G")))
             {
                 Debug.Log("No room to left");
                 return;
@@ -171,39 +194,38 @@ public class Text_Grid : MonoBehaviour {
 
         for (int point = 0; point < 4; point++)
         {
-            Debug.Log(grid[Xcoords[point, 0], Xcoords[point, 1] - 1]);
-            grid[Xcoords[point, 0], Xcoords[point, 1] - 1] = "X";
-            Debug.Log(grid[Xcoords[point, 0], Xcoords[point, 1] - 1]);
+            Debug.Log(grid[Xcoords[point, 0] - 1, Xcoords[point, 1]]);
+            grid[Xcoords[point, 0] - 1, Xcoords[point, 1]] = "X";
+            Debug.Log(grid[Xcoords[point, 0] - 1, Xcoords[point, 1]]);
         }
     }
 
     public void move_right()
     {
-        for (int i = GROUND - 1; i >= 0; i--)
+        for (int row = GROUND - 1; row >= 0; row--)
         {
-            if (grid[i, RIGHT_WALL - 1].Equals("X"))
+            if (grid[RIGHT_WALL - 1, row].Equals("X"))
             {
                 Debug.Log("X On edge");
                 return;
             }
         }
         where_X_are();
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         {
-            if ((grid[Xcoords[i, 0], Xcoords[i, 1] + 1].Equals("G")))
+            if ((grid[Xcoords[point, 0] + 1, Xcoords[point, 1]].Equals("G")))
             {
-                Debug.Log(grid[Xcoords[i, 0], Xcoords[i, 1] + 1] + "  " + Xcoords.ToString());
                 Debug.Log("No room to left");
                 return;
             }
         }
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         {
-            grid[Xcoords[i, 0], Xcoords[i, 1]] = " ";
+            grid[Xcoords[point, 0], Xcoords[point, 1]] = " ";
         }
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         { 
-            grid[Xcoords[i, 0], Xcoords[i, 1] + 1] = "X";
+            grid[Xcoords[point, 0] + 1, Xcoords[point, 1]] = "X";
         }
     }
 
@@ -212,65 +234,60 @@ public class Text_Grid : MonoBehaviour {
     {
         where_X_are();
         bool groundhit = false;
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         {
-            if ((grid[Xcoords[i, 0] + 1, Xcoords[i, 1]].Equals("G")))
+            if ((grid[Xcoords[point, 0], Xcoords[point, 1] + 1].Equals("G")))
             {
                 groundhit = true;
             }
         }
         if (groundhit)
         {
-            for (int i = 0; i < 4; i++)
+            for (int point = 0; point < 4; point++)
             {
-                grid[Xcoords[i, 0], Xcoords[i, 1]] = "G";
+                grid[Xcoords[point, 0], Xcoords[point, 1]] = "G";
             }
             new_piece();
         }
         else
         {
-            for (int i = 0; i < 4; i++)
+            for (int point = 0; point < 4; point++)
             {
-                grid[Xcoords[i, 0], Xcoords[i, 1]] = " ";
+                grid[Xcoords[point, 0], Xcoords[point, 1]] = " ";
             }
-            for (int i = 0; i < 4; i++)
+            for (int point = 0; point < 4; point++)
             {
-                grid[Xcoords[i, 0] + 1, Xcoords[i, 1]] = "X";
+                grid[Xcoords[point, 0], Xcoords[point, 1] + 1] = "X";
             }
         }
     }
             
-    /*public static class pieces
-    {
-        public static void L() { grid[0, 5] = "X"; grid[1, 5] = "X"; grid[2, 5] = "X"; grid[2, 6] = "X"; next_piece = "XXX\n X"; }
 
-    }
-    */
     public void new_piece()
     {
         piece_choice[0] = (Pieces)Random.Range(1, number_of_pieces);
         switch (piece_choice[1])
         {
             case Pieces.L:
-                grid[0, 5] = "X"; grid[1, 5] = "X"; grid[2, 5] = "X"; grid[2, 6] = "X"; //pieces.L();
+                grid[5, 0] = "X"; grid[5, 1] = "X"; grid[5, 2] = "X"; grid[6, 2] = "X";
                 break; //L
             case Pieces.J:
-                grid[0, 5] = "X"; grid[1, 5] = "X"; grid[2, 5] = "X"; grid[2, 4] = "X";
+                grid[5, 0] = "X"; grid[5, 1] = "X"; grid[5, 2] = "X"; grid[4, 2] = "X";
                 break; //J
             case Pieces.I:
-                grid[0, 5] = "X"; grid[1, 5] = "X"; grid[2, 5] = "X"; grid[3, 5] = "X";
+                grid[5, 0] = "X"; grid[5, 1] = "X"; grid[5, 2] = "X"; grid[5, 3] = "X";
                 break; //I
             case Pieces.O:
-                grid[0, 5] = "X"; grid[0, 6] = "X"; grid[1, 5] = "X"; grid[1, 6] = "X";
+                grid[5, 0] = "X"; grid[6, 0] = "X"; grid[5, 1] = "X"; grid[6, 1] = "X";
                 break; //O
             case Pieces.S:
-                grid[0, 4] = "X"; grid[0, 5] = "X"; grid[1, 5] = "X"; grid[1, 6] = "X";
+                grid[4, 0] = "X"; grid[5, 0] = "X"; grid[5, 1] = "X"; grid[6, 1] = "X";
                 break; //S
             case Pieces.Z:
-                grid[0, 5] = "X"; grid[0, 6] = "X"; grid[1, 5] = "X"; grid[1, 4] = "X";
+                grid[5, 0] = "X"; grid[6, 0] = "X"; grid[5, 1] = "X"; grid[4, 1] = "X";
                 break; //Z
             case Pieces.T:
-                grid[0, 4] = "X"; grid[0, 5] = "X"; grid[0, 6] = "X"; grid[1, 5] = "X";
+                grid[4, 0] = "X"; grid[5, 0] = "X"; grid[6, 0] = "X"; grid[5, 1] = "X";
                 break; //T
             default:
                 Debug.Log("New Piece Choice fail!");
@@ -282,27 +299,27 @@ public class Text_Grid : MonoBehaviour {
     public void check_full_row(int row)
     {
         //Debug.Log("check_full_row: " + i.ToString());
-        for (int j = LEFT_WALL + 1; j < RIGHT_WALL; j++)
+        for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
         {
-            if (!(grid[row, j].Equals("G")))
+            if (!(grid[col, row].Equals("G")))
                 return;
         }
         line_destroy_and_drop(row);
     }
 
-    public void line_destroy_and_drop(int row)
+    public void line_destroy_and_drop(int row_to_destroy)
     {
         //Debug.Log("line_destroy_and_drop");
-        for (int j = LEFT_WALL + 1; j < RIGHT_WALL; j++)
+        for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
         {
-            grid[row, j] = " ";
+            grid[col, row_to_destroy] = " ";
         }
 
-        for (int i = row; i >= 0; i--)
+        for (int row = row_to_destroy; row >= 0; row--)
         {
-            for (int j = LEFT_WALL + 1; j < RIGHT_WALL; j++)
+            for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
             {
-                grid[i, j] = grid[i + 1, j];
+                grid[col, row] = grid[col, row + 1];
             }
         }
     }
@@ -311,11 +328,11 @@ public class Text_Grid : MonoBehaviour {
     {
         string to_print = "";
         //to_print = next_piece + "\n";
-        for (int i = 0; i < ROWS; i++)
+        for (int row = 0; row < ROWS; row++)
         {
-            for (int j = 0; j < COLUMNS; j++)
+            for (int col = 0; col < COLUMNS; col++)
             {
-                to_print = to_print + grid[i, j];
+                to_print = to_print + grid[col, row];
             }
             to_print = to_print + "\n";
         }
