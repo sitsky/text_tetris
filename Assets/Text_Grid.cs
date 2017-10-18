@@ -11,7 +11,7 @@ public class Text_Grid : MonoBehaviour {
     const int LEFT_WALL = 0;
     const int RIGHT_WALL = 12;
 
-    public static string[,] grid = new string[ROWS, COLUMNS];
+    public static string[,] grid = new string[COLUMNS, ROWS];
 
     static float DROP_EVERY_SECONDS = 0.5f;
     float time_last_move = 0;
@@ -30,20 +30,20 @@ public class Text_Grid : MonoBehaviour {
     void Start () {
         grid_text = GetComponent<Text>();
         grid_text.text = "";
-        for (int i = 0; i < ROWS; i++)
+        for (int row = 0; row < ROWS; row++)
         {
-            grid[i, LEFT_WALL] = "|";
-            grid[i, RIGHT_WALL] = "|";
+            grid[LEFT_WALL, row] = "|";
+            grid[RIGHT_WALL, row] = "|";
 
-            for (int j = LEFT_WALL + 1; j < RIGHT_WALL; j++)
+            for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
             {
-                if (i < GROUND)
+                if (row < GROUND)
                 {
-                    grid[i, j] = " ";
+                    grid[col, row] = " ";
                 }
                 else
                 {
-                    grid[i, j] = "G"; //Ground mark
+                    grid[col, row] = "G"; //Ground mark
                 }
             }
         }
@@ -53,15 +53,16 @@ public class Text_Grid : MonoBehaviour {
     }
     // Update is called once per frame
     void Update() {
-
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                move_left();
-            }
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                move_right();
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            move_left();
         }
+
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            move_right();
+        }
+
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             rotate_Clockwise();
@@ -70,9 +71,9 @@ public class Text_Grid : MonoBehaviour {
         if (Time.time - time_last_move > DROP_EVERY_SECONDS)
         {
             move_all_one_down(GROUND);
-            for (int i = 0; i < GROUND; i++)
+            for (int row = 0; row < GROUND; row++)
             {
-                check_full_row(i);
+                check_full_row(row);
             }
             time_last_move = Time.time;
         }
@@ -81,16 +82,16 @@ public class Text_Grid : MonoBehaviour {
 
     public void where_X_are()
     {
-        int k = 0;
+        int point = 0;
         for (int col = LEFT_WALL + 1; col < RIGHT_WALL; col++)
         {
             for (int row = GROUND - 1; row >= 0; row--)
             {
                 if (grid[row, col].Equals("X"))
                 {
-                    Xcoords[k, 0] = col;
-                    Xcoords[k, 1] = row;
-                    k++;
+                    Xcoords[point, 0] = col;
+                    Xcoords[point, 1] = row;
+                    point++;
                 }
             }
         }
@@ -101,76 +102,78 @@ public class Text_Grid : MonoBehaviour {
         where_X_are();
         int central_coordinate_for_rows = 0;
         int central_coordinate_for_cols = 0;
-        for (int i = 0; i<4; i++)
+        for (int point = 0; point <4; point++)
         {
-            central_coordinate_for_cols = central_coordinate_for_cols + Xcoords[i, 0];
-            central_coordinate_for_rows = central_coordinate_for_rows + Xcoords[i, 1];
+            central_coordinate_for_cols = central_coordinate_for_cols + Xcoords[point, 0];
+            central_coordinate_for_rows = central_coordinate_for_rows + Xcoords[point, 1];
         }
         central_coordinate_for_cols = (int)Mathf.Floor(central_coordinate_for_cols / 4f);
         central_coordinate_for_rows = (int)Mathf.Floor(central_coordinate_for_rows / 4f);
 
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         {
-            Xcoords[i, 0] = (Xcoords[i, 0] - central_coordinate_for_cols);
-            Xcoords[i, 1] = (Xcoords[i, 1] - central_coordinate_for_rows);
+            Xcoords[point, 0] = (Xcoords[point, 0] - central_coordinate_for_cols);
+            Xcoords[point, 1] = (Xcoords[point, 1] - central_coordinate_for_rows);
         }
 
         int[,] rotation = { { 0, 1 }, { -1, 0 } };
         int[,] Rotated_Xcoords = new int[4, 2];
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         {
-            Rotated_Xcoords[i, 0] = (Xcoords[i, 0] * rotation[0, 0] + Xcoords[i, 1] * rotation[0, 1]) + central_coordinate_for_cols;
-            Rotated_Xcoords[i, 1] = (Xcoords[i, 0] * rotation[1, 0] + Xcoords[i, 1] * rotation[1, 1]) + central_coordinate_for_rows;
+            Rotated_Xcoords[point, 0] = (Xcoords[point, 0] * rotation[0, 0] + Xcoords[point, 1] * rotation[0, 1]) + central_coordinate_for_cols;
+            Rotated_Xcoords[point, 1] = (Xcoords[point, 0] * rotation[1, 0] + Xcoords[point, 1] * rotation[1, 1]) + central_coordinate_for_rows;
         }
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         {
-            if ((grid[Rotated_Xcoords[i, 0], Rotated_Xcoords[i, 1] ].Equals("G")))
+            if ((grid[Rotated_Xcoords[point, 0], Rotated_Xcoords[point, 1] ].Equals("G")))
             {
-                Debug.Log(grid[Xcoords[i, 0]-1, Xcoords[i, 1] + 1] + "  " + Xcoords.ToString());
-                Debug.Log("No room to rotate");
+                Debug.Log("No room to rotate turn to G");
                 return;
             }
-            if ((Rotated_Xcoords[i, 0] < 0) || (Rotated_Xcoords[i, 1] < 0))
+            if ((Rotated_Xcoords[point, 0] < LEFT_WALL + 1) || (Rotated_Xcoords[point, 1] < 0))
+            {
+                return;
+            }
+            if(Rotated_Xcoords[point, 0] > RIGHT_WALL)
             {
                 return;
             }
         }
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         {
-            grid[Rotated_Xcoords[i, 0], Rotated_Xcoords[i, 1]] = "X";
+            grid[Rotated_Xcoords[point, 0], Rotated_Xcoords[point, 1]] = "X";
         }
     }
 
     public void move_left()
     {
-        for (int i = GROUND - 1; i >= 0; i--)
+        for (int row = GROUND - 1; row >= 0; row--)
         {
-            if (grid[i, LEFT_WALL + 1].Equals("X"))
+            if (grid[row, LEFT_WALL + 1].Equals("X"))
             {
                 Debug.Log("X On edge");
                 return;
             }
         }
         where_X_are();
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         {
-            if ((grid[Xcoords[i, 0], Xcoords[i, 1] - 1].Equals("G")))
+            if ((grid[Xcoords[point, 0], Xcoords[point, 1] - 1].Equals("G")))
             {
-                Debug.Log(grid[Xcoords[i, 0], Xcoords[i, 1] - 1] + "  " + Xcoords.ToString());
                 Debug.Log("No room to left");
                 return;
             }
         }
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         {
-            grid[Xcoords[i, 0], Xcoords[i, 1]] = " ";
+            grid[Xcoords[point, 0], Xcoords[point, 1]] = " ";
         }
 
-        for (int i = 0; i < 4; i++)
+        for (int point = 0; point < 4; point++)
         {
-            Debug.Log(grid[Xcoords[i, 0], Xcoords[i, 1] - 1]);
-            grid[Xcoords[i, 0], Xcoords[i, 1] - 1] = "X";
-            Debug.Log(grid[Xcoords[i, 0], Xcoords[i, 1] - 1]);
+            Debug.Log(grid[Xcoords[point, 0], Xcoords[point, 1] - 1]);
+            grid[Xcoords[point, 0], Xcoords[point, 1] - 1] = "X";
+            Debug.Log(grid[Xcoords[point, 0], Xcoords[point, 1] - 1]);
         }
     }
 
