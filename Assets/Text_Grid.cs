@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEditor;
 
 public class Text_Grid : MonoBehaviour {
 
@@ -18,11 +19,8 @@ public class Text_Grid : MonoBehaviour {
 
     public enum Pieces:int {L= 1, J, I, O, S, Z, T};
     public int number_of_pieces = 7;
-
     Pieces[] piece_choice = new Pieces[2];
     
-    //static string next_piece;
-
     int[,] Xcoords = new int[4, 2];
     Text grid_text;
 
@@ -76,10 +74,11 @@ public class Text_Grid : MonoBehaviour {
         if (Time.time - time_last_move > DROP_EVERY_SECONDS)
         {
             move_all_one_down(GROUND);
-
             time_last_move = Time.time;
         }
         grid_print();
+        if (!enabled)
+            Game_Over();
     }
 
     public void where_X_are()
@@ -304,6 +303,11 @@ public class Text_Grid : MonoBehaviour {
             for (int point = 0; point < 4; point++)
             {
                 grid[Xcoords[point, 0], Xcoords[point, 1]] = "G";
+                if (Xcoords[point, 1] == 0)
+                {
+
+                    enabled = false;
+                }
             }
             for (int row = 0; row < GROUND; row++)
             {
@@ -387,10 +391,21 @@ public class Text_Grid : MonoBehaviour {
         }
     }
 
+    public void Game_Over()
+    {
+
+
+        grid_text.text = "GAME OVER!";
+
+        grid_text.fontSize = 16;
+        EditorApplication.isPaused = true;
+    }
+
+
     public void grid_print()
     {
         string to_print = piece_choice[0].ToString() + "\n";
-        //to_print = next_piece + "\n";
+
         for (int row = 0; row < ROWS; row++)
         {
             for (int col = 0; col < COLUMNS; col++)
